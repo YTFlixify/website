@@ -42,10 +42,8 @@ export default function ForgotPassword() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <Link href="/" className="inline-block">
-              <h1 className="text-4xl font-bold tracking-tighter">
-                FORT<span className="text-yellow-400">CREATOR</span>
-              </h1>
+            <Link href="/" className="font-bold text-2xl tracking-tighter">
+              FLIXIFY
             </Link>
             <h2 className="mt-6 text-3xl font-bold">Reset your password</h2>
             <p className="mt-2 text-zinc-400">Enter your email and we'll send you a link to reset your password</p>
@@ -79,8 +77,8 @@ export default function ForgotPassword() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-yellow-400 focus:ring-yellow-400"
-                  placeholder="Enter your email"
+                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-[#00517c] focus:ring-[#00517c]"
+                  placeholder="Email"
                 />
               </div>
             </div>
@@ -89,9 +87,9 @@ export default function ForgotPassword() {
               <Button
                 type="submit"
                 disabled={isLoading || !!success}
-                className="w-full py-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-lg"
+                className="w-full py-6 bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold text-lg"
               >
-                {isLoading ? "Sending..." : "SEND RESET LINK"}
+                {isLoading ? "Sending..." : "Reset Password"}
               </Button>
             </div>
           </form>
@@ -99,7 +97,7 @@ export default function ForgotPassword() {
           <div className="mt-6 text-center">
             <p className="text-zinc-400">
               Remember your password?{" "}
-              <Link href="/auth/sign-in" className="text-yellow-400 hover:text-yellow-500 font-medium">
+              <Link href="/auth/sign-in" className="text-[#00517c] hover:text-[#00517c]/90 font-medium">
                 Sign in
               </Link>
             </p>
@@ -108,7 +106,7 @@ export default function ForgotPassword() {
       </div>
 
       <footer className="py-6 text-center text-zinc-500 text-sm">
-        <p>© 2025 FortCreator. All rights reserved.</p>
+        <p>© 2025 <span className="text-[#00517c]">FLIXIFY</span>. All rights reserved.</p>
       </footer>
     </div>
   )

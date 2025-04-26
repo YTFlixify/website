@@ -10,7 +10,7 @@ export default function NotFound() {
         The page you are looking for doesn't exist or has been moved.
       </p>
       <Link href="/">
-        <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold">Return to Home</Button>
+        <Button className="bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold">Return to Home</Button>
       </Link>
     </div>
   )

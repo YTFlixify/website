@@ -35,10 +35,8 @@ export default function SignUp() {
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <Link href="/" className="inline-block">
-              <h1 className="text-4xl font-bold tracking-tighter">
-                FORT<span className="text-yellow-400">CREATOR</span>
-              </h1>
+            <Link href="/" className="font-bold text-2xl tracking-tighter">
+              <span className="text-[#00517c]">FLIXIFY</span>
             </Link>
             <h2 className="mt-6 text-3xl font-bold">Create your account</h2>
             <p className="mt-2 text-zinc-400">Join the community and get access to exclusive content</p>
@@ -69,7 +67,7 @@ export default function SignUp() {
                   name="username"
                   type="text"
                   required
-                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-yellow-400 focus:ring-yellow-400"
+                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-[#00517c] focus:ring-[#00517c]"
                   placeholder="Choose a username"
                 />
               </div>
@@ -84,7 +82,7 @@ export default function SignUp() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-yellow-400 focus:ring-yellow-400"
+                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-[#00517c] focus:ring-[#00517c]"
                   placeholder="Enter your email"
                 />
               </div>
@@ -99,7 +97,7 @@ export default function SignUp() {
                   type="password"
                   autoComplete="new-password"
                   required
-                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-yellow-400 focus:ring-yellow-400"
+                  className="mt-1 block w-full bg-zinc-900 border-zinc-800 focus:border-[#00517c] focus:ring-[#00517c]"
                   placeholder="Create a password"
                 />
                 <p className="mt-1 text-xs text-zinc-500">Password must be at least 6 characters long</p>
@@ -110,7 +108,7 @@ export default function SignUp() {
               <Button
                 type="submit"
                 disabled={isLoading || !!success}
-                className="w-full py-6 bg-yellow-400 hover:bg-yellow-500 text-black font-bold text-lg"
+                className="w-full py-6 bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold text-lg"
               >
                 {isLoading ? "Creating account..." : "CREATE ACCOUNT"}
               </Button>
@@ -120,7 +118,7 @@ export default function SignUp() {
           <div className="mt-6 text-center">
             <p className="text-zinc-400">
               Already have an account?{" "}
-              <Link href="/auth/sign-in" className="text-yellow-400 hover:text-yellow-500 font-medium">
+              <Link href="/auth/sign-in" className="text-[#00517c] hover:text-[#00517c]/90 font-medium">
                 Sign in
               </Link>
             </p>
@@ -129,7 +127,7 @@ export default function SignUp() {
       </div>
 
       <footer className="py-6 text-center text-zinc-500 text-sm">
-        <p>© 2025 FortCreator. All rights reserved.</p>
+        <p>© 2025 Flixify. All rights reserved.</p>
       </footer>
     </div>
   )

@@ -9,7 +9,8 @@ export async function signIn(formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
-  const supabase = createServerActionClient<Database>({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerActionClient<Database>({ cookies: () => cookieStore })
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -28,7 +29,8 @@ export async function signUp(formData: FormData) {
   const password = formData.get("password") as string
   const username = formData.get("username") as string
 
-  const supabase = createServerActionClient<Database>({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerActionClient<Database>({ cookies: () => cookieStore })
 
   const { error, data } = await supabase.auth.signUp({
     email,
@@ -50,13 +52,15 @@ export async function signUp(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerActionClient<Database>({ cookies: () => cookieStore })
   await supabase.auth.signOut()
   redirect("/")
 }
 
 export async function getSession() {
-  const supabase = createServerActionClient<Database>({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerActionClient<Database>({ cookies: () => cookieStore })
   const {
     data: { session },
   } = await supabase.auth.getSession()

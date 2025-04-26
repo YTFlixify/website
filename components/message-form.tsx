@@ -89,13 +89,13 @@ export function MessageForm({ recipientId, recipientName }: MessageFormProps) {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder={`Send a message to ${recipientName}...`}
-          className="min-h-[120px] bg-zinc-800 border-zinc-700 focus:border-yellow-400 focus:ring-yellow-400"
+          className="min-h-[120px] bg-zinc-800 border-zinc-700 focus:border-[#00517c] focus:ring-[#00517c]"
         />
         <div className="flex justify-end">
           <Button
             type="submit"
             disabled={sending || !message.trim()}
-            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold"
+            className="bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold"
           >
             {sending ? "Sending..." : "Send Message"}
           </Button>

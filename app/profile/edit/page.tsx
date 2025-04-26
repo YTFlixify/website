@@ -2,16 +2,18 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react"
+import { AlertCircle, CheckCircle2, ArrowLeft, Upload } from "lucide-react"
+import { initializeStorage } from "@/lib/supabase/storage"
 
 export default function EditProfile() {
   const router = useRouter()
@@ -24,7 +26,10 @@ export default function EditProfile() {
     username: "",
     display_name: "",
     bio: "",
+    avatar_url: "",
   })
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function getProfile() {
@@ -40,11 +45,33 @@ export default function EditProfile() {
           return
         }
 
-        const { data, error } = await supabase
+        // First try to get the profile
+        let { data, error } = await supabase
           .from("profiles")
-          .select("username, display_name, bio")
+          .select("username, display_name, bio, avatar_url")
           .eq("id", session.user.id)
           .single()
+
+        // If profile doesn't exist, create it
+        if (!data && !error) {
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert([
+              {
+                id: session.user.id,
+                username: session.user.email?.split("@")[0] || "user",
+                display_name: session.user.email?.split("@")[0] || "User",
+              },
+            ])
+            .select("username, display_name, bio, avatar_url")
+            .single()
+
+          if (createError) {
+            throw createError
+          }
+
+          data = newProfile
+        }
 
         if (error) {
           throw error
@@ -55,11 +82,15 @@ export default function EditProfile() {
             username: data.username || "",
             display_name: data.display_name || "",
             bio: data.bio || "",
+            avatar_url: data.avatar_url || "",
           })
+          if (data.avatar_url) {
+            setPreviewUrl(data.avatar_url)
+          }
         }
       } catch (error) {
         console.error("Error loading profile:", error)
-        setError("Failed to load profile")
+        setError("Failed to load profile. Please try again later.")
       } finally {
         setLoading(false)
       }
@@ -67,6 +98,85 @@ export default function EditProfile() {
 
     getProfile()
   }, [supabase, router])
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Create preview URL
+    const previewUrl = URL.createObjectURL(file)
+    setPreviewUrl(previewUrl)
+
+    try {
+      setSaving(true)
+      setError(null)
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session) {
+        router.push("/auth/sign-in")
+        return
+      }
+
+      console.log("Starting file upload...")
+      console.log("File details:", {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      })
+
+      // Upload image to Supabase Storage
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`
+      const filePath = fileName
+
+      console.log("Attempting upload to path:", filePath)
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        })
+
+      console.log("Upload result:", { error: uploadError })
+
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`)
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath)
+
+      console.log("Generated public URL:", publicUrl)
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', session.user.id)
+
+      if (updateError) {
+        throw new Error(`Profile update failed: ${updateError.message}`)
+      }
+
+      setProfile(prev => ({ ...prev, avatar_url: publicUrl }))
+      setSuccess("Profile picture updated successfully!")
+    } catch (error: any) {
+      console.error("Error uploading image:", error)
+      setError(error.message || "Failed to upload profile picture")
+      // Clean up the preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -125,7 +235,7 @@ export default function EditProfile() {
         <div className="container mx-auto px-4">
           <div className="flex items-center h-16">
             <Link href="/" className="font-bold text-2xl tracking-tighter">
-              FORT<span className="text-yellow-400">CREATOR</span>
+              FLIXIFY
             </Link>
           </div>
         </div>
@@ -134,7 +244,7 @@ export default function EditProfile() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center mb-8">
-            <Link href="/profile" className="flex items-center text-yellow-400 hover:text-yellow-500">
+            <Link href="/profile" className="flex items-center text-[#00517c] hover:text-[#00517c]/90">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Back to Profile
             </Link>
@@ -158,12 +268,44 @@ export default function EditProfile() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-yellow-400 border-r-transparent"></div>
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#00517c] border-r-transparent"></div>
               <p className="mt-4">Loading profile...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900 p-6 rounded-lg">
               <div className="space-y-4">
+                <div className="flex flex-col items-center">
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden mb-4">
+                    {previewUrl ? (
+                      <Image
+                        src={previewUrl}
+                        alt="Profile preview"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
+                        <span className="text-4xl">{profile.display_name.charAt(0).toUpperCase()}</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-[#00517c] hover:bg-[#00517c]/90 text-white"
+                  >
+                    <Upload className="mr-2 h-4 w-4" />
+                    Change Profile Picture
+                  </Button>
+                </div>
+
                 <div>
                   <Label htmlFor="username" className="text-sm font-medium">
                     Username
@@ -173,7 +315,7 @@ export default function EditProfile() {
                     name="username"
                     value={profile.username}
                     onChange={handleChange}
-                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-yellow-400 focus:ring-yellow-400"
+                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-[#00517c] focus:ring-[#00517c]"
                     required
                   />
                   <p className="mt-1 text-xs text-zinc-500">This is your unique identifier on the platform</p>
@@ -188,7 +330,7 @@ export default function EditProfile() {
                     name="display_name"
                     value={profile.display_name}
                     onChange={handleChange}
-                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-yellow-400 focus:ring-yellow-400"
+                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-[#00517c] focus:ring-[#00517c]"
                   />
                   <p className="mt-1 text-xs text-zinc-500">This is how your name will appear to others</p>
                 </div>
@@ -203,7 +345,7 @@ export default function EditProfile() {
                     value={profile.bio}
                     onChange={handleChange}
                     rows={4}
-                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-yellow-400 focus:ring-yellow-400"
+                    className="mt-1 block w-full bg-zinc-800 border-zinc-700 focus:border-[#00517c] focus:ring-[#00517c]"
                   />
                   <p className="mt-1 text-xs text-zinc-500">Tell others a bit about yourself</p>
                 </div>
@@ -221,7 +363,7 @@ export default function EditProfile() {
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold"
+                  className="bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold"
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </Button>

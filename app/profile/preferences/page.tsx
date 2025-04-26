@@ -28,12 +28,26 @@ export default function EditPreferences() {
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
 
   const categories = [
-    "Gameplay Highlights",
-    "Tips & Tricks",
-    "Update Reviews",
-    "Challenges",
-    "Collaborations",
-    "Live Streams",
+    { 
+      id: "live-streams",
+      title: "Live Streams", 
+      desc: "Watch me play live and interact with the community"
+    },
+    { 
+      id: "challenges",
+      title: "Challenges", 
+      desc: "Epic gaming challenges and competitions"
+    },
+    { 
+      id: "shorts",
+      title: "YouTube Shorts", 
+      desc: "Quick, entertaining gaming moments"
+    },
+    { 
+      id: "gameplay",
+      title: "Gameplay Videos", 
+      desc: "Full gameplay sessions and walkthroughs"
+    }
   ]
 
   useEffect(() => {
@@ -139,7 +153,7 @@ export default function EditPreferences() {
         <div className="container mx-auto px-4">
           <div className="flex items-center h-16">
             <Link href="/" className="font-bold text-2xl tracking-tighter">
-              FORT<span className="text-yellow-400">CREATOR</span>
+              FLIXIFY
             </Link>
           </div>
         </div>
@@ -148,7 +162,7 @@ export default function EditPreferences() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center mb-8">
-            <Link href="/profile" className="flex items-center text-yellow-400 hover:text-yellow-500">
+            <Link href="/profile" className="flex items-center text-[#00517c] hover:text-[#00517c]/90">
               <ArrowLeft className="mr-2 h-5 w-5" />
               Back to Profile
             </Link>
@@ -172,7 +186,7 @@ export default function EditPreferences() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-yellow-400 border-r-transparent"></div>
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#00517c] border-r-transparent"></div>
               <p className="mt-4">Loading preferences...</p>
             </div>
           ) : (
@@ -186,13 +200,13 @@ export default function EditPreferences() {
                     value={preferences.favorite_category}
                     onValueChange={(value) => setPreferences((prev) => ({ ...prev, favorite_category: value }))}
                   >
-                    <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 focus:ring-yellow-400">
+                    <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 focus:ring-[#00517c]">
                       <SelectValue placeholder="Select your favorite category" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                        <SelectItem key={category.id} value={category.title}>
+                          {category.title}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -213,7 +227,7 @@ export default function EditPreferences() {
                     onCheckedChange={(checked) =>
                       setPreferences((prev) => ({ ...prev, notification_enabled: checked }))
                     }
-                    className="data-[state=checked]:bg-yellow-400"
+                    className="data-[state=checked]:bg-[#00517c]"
                   />
                 </div>
               </div>
@@ -230,7 +244,7 @@ export default function EditPreferences() {
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold"
+                  className="bg-[#00517c] hover:bg-[#00517c]/90 text-white font-bold"
                 >
                   {saving ? "Saving..." : "Save Preferences"}
                 </Button>
